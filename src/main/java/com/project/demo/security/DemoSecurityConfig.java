@@ -1,39 +1,26 @@
 package com.project.demo.security;
 
+import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class DemoSecurityConfig {
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails john = User.builder()
-            .username("john")
-            .password("{noop}test123")
-            .roles("EMPLOYEE")
-            .build();
+    public UserDetailsManager userDetailsManager(DataSource dataSource) {
 
-        UserDetails mary = User.builder()
-            .username("mary")
-            .password("{noop}test123")
-            .roles("EMPLOYEE", "MANAGER")
-            .build();
-
-        UserDetails suzan = User.builder()
-            .username("suzan")
-            .password("{noop}test123")
-            .roles("EMPLOYEE", "MANAGER", "ADMIN")
-            .build();
-
-        return new InMemoryUserDetailsManager(john, mary, suzan);
+        return new JdbcUserDetailsManager(dataSource);
     }
 
     @Bean
@@ -49,8 +36,33 @@ public class DemoSecurityConfig {
 
         http.httpBasic(Customizer.withDefaults());
 
-        http.csrf(csrf -> csrf.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
+
+    /**
+     @Bean
+     public InMemoryUserDetailsManager userDetailsService() {
+     UserDetails john = User.builder()
+     .username("john")
+     .password("{noop}test123")
+     .roles("EMPLOYEE")
+     .build();
+
+     UserDetails mary = User.builder()
+     .username("mary")
+     .password("{noop}test123")
+     .roles("EMPLOYEE", "MANAGER")
+     .build();
+
+     UserDetails suzan = User.builder()
+     .username("suzan")
+     .password("{noop}test123")
+     .roles("EMPLOYEE", "MANAGER", "ADMIN")
+     .build();
+
+     return new InMemoryUserDetailsManager(john, mary, suzan);
+     }
+     */
 }
